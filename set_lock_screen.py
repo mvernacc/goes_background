@@ -7,6 +7,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
+import sys
 from winrt.windows.system.userprofile import UserProfilePersonalizationSettings
 from winrt.windows.storage import StorageFile, ApplicationData
 from PIL import Image
@@ -40,26 +41,30 @@ async def async_main():
     image_4k = Image.new('RGB', (3840, 2160))
     image_4k.paste(goes_image, (int((3840 - GOES_IMG_WIDTH) / 2), 2160 - GOES_IMG_HEIGHT))
 
-    # Save the image to a temporary folder, then copy it to the ApplicationData Local Folder.
+    # Save the image to a temporary file in the ApplicationData Local Folder.
     now = datetime.now()
-    temp_img_filepath = Path(__file__).parent / 'temp' / now.strftime('img_%Y-%m-%dT%H%M%S.jpg')
+    temp_img_filepath = (Path(ApplicationData.get_current().local_folder.path)
+                         / now.strftime('goes_lockscreen_img_%Y-%m-%dT%H%M%S.jpg'))
     image_4k.save(temp_img_filepath)
 
+    # Re-open the file we just saved as a Windows `StorageFile`.
     img_file = await StorageFile.get_file_from_path_async(os.fspath(
         temp_img_filepath))
-    img_file_copy = await img_file.copy_async(
-        ApplicationData.get_current().local_folder
-    )
 
     # Set the Lock Screen image.
     # Note - this will fail unless the image file provided to `try_set_lock_screen_image_async`
     # is in the ApplicationData Local Folder.
-    settings = UserProfilePersonalizationSettings.get_current()
-    success = await settings.try_set_lock_screen_image_async(img_file_copy)
-    logger.info(f'Set lock screen success flag: {success}')
+    # Wrap this in try so we can still delete the temporary `img_file` if there is an exception.
+    success = False
+    try:
+        settings = UserProfilePersonalizationSettings.get_current()
+        success = await settings.try_set_lock_screen_image_async(img_file)
+        logger.info(f'Set lock screen success flag: {success}')
+    finally:
+        # Clean up.
+        await img_file.delete_async()
 
-    # Clean up.
-    img_file.delete_async()
-    img_file_copy.delete_async()
+    if not success:
+        sys.exit(1)
 
 asyncio.run(async_main())
