@@ -14,6 +14,8 @@ WARNING: USE AT YOUR OWN RISK! This code requires some not-so-safe steps (e.g. t
 
 You must have python 3 installed in Windows 10. You can install python via the Windows Store.
 
+This code is meant to work with a 4k display; the lock screen image is saved with a size of 3840x2160 pixels. It has not been tested with other display resolutions. 
+
 ## Setup
 
 ### Take ownership of the folder where lockscreen images are stored
