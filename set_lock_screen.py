@@ -1,10 +1,14 @@
 """Set the Windows 10 lock screen to a live image of Earth from the GOES satellites.
 """
-from pathlib import Path
-import subprocess
+import asyncio
+from datetime import datetime
+from io import BytesIO
 import logging
 from logging.handlers import RotatingFileHandler
-from io import BytesIO
+import os
+from pathlib import Path
+from winrt.windows.system.userprofile import UserProfilePersonalizationSettings
+from winrt.windows.storage import StorageFile, ApplicationData
 from PIL import Image
 import requests
 
@@ -25,26 +29,37 @@ logger = logging.getLogger('root')
 logger.setLevel(logging.INFO)
 logger.addHandler(my_handler)
 
-# Get the SID of the current user.
-wmic_result = subprocess.check_output("wmic useraccount where name='%username%' get sid", shell=True)
-sid = wmic_result.decode().split('\n')[1].strip()
 
-# Create the path where Windows keeps the lockscreen image file.
-lockscreen_image_filepath = (
-    Path(r'C:\ProgramData\Microsoft\Windows\SystemData')
-    / sid
-    / r'ReadOnly\LockScreen_O'  # You might need to change this line.
-    / 'LockScreen___3840_2160_notdimmed.jpg')
+async def async_main():
+    # Fetch the latest GOES image from NOAA's server.
+    response = requests.get(GOES_IMG_URL)
+    goes_image = Image.open(BytesIO(response.content))
+    logger.info(f'Image gotten from {GOES_IMG_URL:s}')
 
-# Fetch the latest GOES image from NOAA's server.
-response = requests.get(GOES_IMG_URL)
-goes_image = Image.open(BytesIO(response.content))
-logger.info('Image gotten from {:s}'.format(GOES_IMG_URL))
+    # Paste the GOES image into a black 4k image.
+    image_4k = Image.new('RGB', (3840, 2160))
+    image_4k.paste(goes_image, (int((3840 - GOES_IMG_WIDTH) / 2), 2160 - GOES_IMG_HEIGHT))
 
-# Paste the GOES image into a black 4k image.
-image_4k = Image.new('RGB', (3840, 2160))
-image_4k.paste(goes_image, (int((3840 - GOES_IMG_WIDTH) / 2), 2160 - GOES_IMG_HEIGHT))
+    # Save the image to a temporary folder, then copy it to the ApplicationData Local Folder.
+    now = datetime.now()
+    temp_img_filepath = Path(__file__).parent / 'temp' / now.strftime('img_%Y-%m-%dT%H%M%S.jpg')
+    image_4k.save(temp_img_filepath)
 
-# Write the image to the lockscreen image location.
-image_4k.save(lockscreen_image_filepath)
-logger.info('Image written to {:}'.format(lockscreen_image_filepath))
+    img_file = await StorageFile.get_file_from_path_async(os.fspath(
+        temp_img_filepath))
+    img_file_copy = await img_file.copy_async(
+        ApplicationData.get_current().local_folder
+    )
+
+    # Set the Lock Screen image.
+    # Note - this will fail unless the image file provided to `try_set_lock_screen_image_async`
+    # is in the ApplicationData Local Folder.
+    settings = UserProfilePersonalizationSettings.get_current()
+    success = await settings.try_set_lock_screen_image_async(img_file_copy)
+    logger.info(f'Set lock screen success flag: {success}')
+
+    # Clean up.
+    img_file.delete_async()
+    img_file_copy.delete_async()
+
+asyncio.run(async_main())
