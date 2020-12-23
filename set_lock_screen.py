@@ -24,12 +24,11 @@ sid = wmic_result.decode().split('\n')[1].strip()
 lockscreen_image_filepath = (
     Path(r'C:\ProgramData\Microsoft\Windows\SystemData')
     / sid / r'ReadOnly\LockScreen_O\LockScreen___3840_2160_notdimmed.jpg')
-print(lockscreen_image_filepath)
 
 # Fetch the latest GOES image from NOAA's server.
 response = requests.get(GOES_IMG_URL)
 goes_image = Image.open(BytesIO(response.content))
-# goes_image.save('goes_1808x1808.jpg')
+print('image gotten from {:s}'.format(GOES_IMG_URL))
 
 # Paste the GOES image into a black 4k image.
 image_4k = Image.new('RGB', (3840, 2160))
@@ -37,4 +36,4 @@ image_4k.paste(goes_image, (int((3840 - GOES_IMG_WIDTH) / 2), 2160 - GOES_IMG_HE
 
 # Write the image to the lockscreen image location.
 image_4k.save(lockscreen_image_filepath)
-print('Image written to {:s}'.format(lockscreen_image_filepath))
+print('Image written to {:}'.format(lockscreen_image_filepath))
