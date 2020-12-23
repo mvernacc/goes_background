@@ -4,7 +4,7 @@ Set the Windows 10 lock screen to a live* image of Earth from the [GOES satellit
 
 Thanks to NOAA and NASA for providing us with these amazing images!
 
-WARNING: USE AT YOUR OWN RISK! This code requires some not-so-safe steps (e.g. taking ownership of and modifying a system file with `ReadOnly` in the name). I have not tested this code thoroughly, and I can't promise that you won't bork your system using it.
+WARNING: USE AT YOUR OWN RISK! I have not tested this code thoroughly, and I can't promise that you won't bork your system using it. In particular, this code uses `PIL` to open a (untrusted) image from the web; `PIL` has had many security vulnerabilities in the past ([examples](https://nvd.nist.gov/vuln/search/results?form_type=Basic&results_type=overview&query=python+image+library&search_type=all)).
 
 *It seems the images are 30~40 minutes old by the time they make it from the satellite, though NOAA's servers, to my computer.
 
@@ -18,29 +18,12 @@ This code is meant to work with a 4k display; the lock screen image is saved wit
 
 ## Setup
 
-### Take ownership of the folder where lockscreen images are stored
+### Install requirements
 
-Windows 10 stores the lockscreen image for your user account in 
+Run in PowerShell or command line, from the repo's top directory:
 ```
-C:\ProgramData\Microsoft\Windows\SystemData\${sid}\ReadOnly\LockScreen_${char}\LockScreen___3840_2160_notdimmed.jpg
+pip install -r requirements.txt
 ```
-
-where `${sid}` is the SID for your user account and ${char} is a random(?) character (it's `O` in my case).
-
-First, find your SID by running the following in command line:
-```
-wmic useraccount where name='%username%' get sid
-```
-
-Then, take ownership of your SystemData folder. Open command line as administrator and run:
-```
-takeown /F C:\ProgramData\Microsoft\Windows\SystemData\${sid} /r /d Y
-```
-replacing `${sid}` with your SID.
-
-### Check the character in your lockscreen folder
-
-Your lockscreen image might not be in `C:\ProgramData\Microsoft\Windows\SystemData\${sid}\ReadOnly\LockScreen_O\`, but might instead has some other character in the `LockScreen_` folder name. If this is the case, you will need to modify  `set_lock_screen.py` where `lockscreen_image_filepath` is defined.
 
 ### Test the python script
 
