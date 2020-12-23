@@ -1,9 +1,4 @@
-"""
-First, take ownership of the SystemData folder by opening command prompt as administrator and running:
-```
-takeown /F C:\ProgramData\Microsoft\Windows\SystemData\ /r /d Y
-```
-Reference: https://superuser.com/a/1210076, comments
+"""Set the Windows 10 lock screen to a live image of Earth from the GOES satellites.
 """
 from pathlib import Path
 import subprocess
@@ -23,7 +18,9 @@ sid = wmic_result.decode().split('\n')[1].strip()
 # Create the path where Windows keeps the lockscreen image file.
 lockscreen_image_filepath = (
     Path(r'C:\ProgramData\Microsoft\Windows\SystemData')
-    / sid / r'ReadOnly\LockScreen_O\LockScreen___3840_2160_notdimmed.jpg')
+    / sid
+    / r'ReadOnly\LockScreen_O'  # You might need to change this line.
+    / 'LockScreen___3840_2160_notdimmed.jpg')
 
 # Fetch the latest GOES image from NOAA's server.
 response = requests.get(GOES_IMG_URL)
