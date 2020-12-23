@@ -2,7 +2,7 @@
 
 Set the Windows 10 lock screen to a live* image of Earth from the [GOES satellites](https://www.goes-r.gov/).
 
-Thanks to NOAA and NASA for providing us with these amazing images!
+Thanks to NOAA and NASA for providing us with these amazing images! The images show (approximated) true color on the day side of the planet and IR imagery on the night side. You can learn about how these images are created [here](https://www.star.nesdis.noaa.gov/GOES/documents/QuickGuide_CIRA_Geocolor_20171019.pdf).
 
 WARNING: USE AT YOUR OWN RISK! I have not tested this code thoroughly, and I can't promise that you won't bork your system using it. In particular, this code uses `PIL` to open a (untrusted) image from the web; `PIL` has had many security vulnerabilities in the past ([examples](https://nvd.nist.gov/vuln/search/results?form_type=Basic&results_type=overview&query=python+image+library&search_type=all)).
 
