@@ -8,6 +8,8 @@ WARNING: USE AT YOUR OWN RISK! This code requires some not-so-safe steps (e.g. t
 
 *It seems the images are 30~40 minutes old by the time they make it from the satellite, though NOAA's servers, to my computer.
 
+![Image of Earth from a GOES satellite](https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/1808x1808.jpg =500x500)
+
 ## Prerequisites
 
 You must have python 3 installed in Windows 10. You can install python via the Windows Store.
