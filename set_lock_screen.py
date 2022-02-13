@@ -8,8 +8,8 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import sys
-from winrt.windows.system.userprofile import UserProfilePersonalizationSettings
-from winrt.windows.storage import StorageFile, ApplicationData
+from winsdk.windows.system.userprofile import UserProfilePersonalizationSettings
+from winsdk.windows.storage import StorageFile, ApplicationData
 from PIL import Image
 import requests
 
